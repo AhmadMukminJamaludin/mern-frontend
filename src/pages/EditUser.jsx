@@ -1,17 +1,33 @@
 import axios from 'axios';
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 export default function InputUser() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [gender, setGender] = useState("Male");
+    const [gender, setGender] = useState("");
     const navigate = useNavigate();
+    const { _id } = useParams();
+    var selectedMale = (gender === "Male") ? 'selected' : 'false';
+    var selectedFemale = (gender === "Female") ? 'selected' : 'false';
 
-    const storeUser = async (e) => {
+    useEffect(() => {
+        getUserById();
+    }, []);
+
+    const getUserById = async () => {
+        const res = await axios.get(`http://localhost:5000/users/${_id}`);
+        setName(res.data.name);
+        setEmail(res.data.email);
+        setGender(res.data.gender);
+        console.log(res.data);
+    };
+
+    const updateUser = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/users', {
+            await axios.put(`http://localhost:5000/users/${_id}`, {
                 name,
                 email,
                 gender
@@ -26,8 +42,8 @@ export default function InputUser() {
         <div className="m-3">
             <div className="card w-96 bg-base-100 shadow-xl">
                 <div className="card-body">
-                    <h2 className="card-title">Tambah data</h2>
-                    <form onSubmit={storeUser}>
+                    <h2 className="card-title">Edit data</h2>
+                    <form onSubmit={updateUser}>
                         <div className="form-control w-full max-w-xs">
                             <label className="label">
                                 <span className="label-text">Nama</span>
@@ -58,11 +74,10 @@ export default function InputUser() {
                             </label>
                             <select
                                 className="select select-bordered w-full max-w-xs"
-                                value={gender}
                                 onChange={(e) => setGender(e.target.value)}
                             >
-                                <option>Laki-laki</option>
-                                <option>Perempuan</option>
+                                <option value={"Male"} selected={selectedMale}>Laki-laki</option>
+                                <option value={"Female"} selected={selectedFemale}>Perempuan</option>
                             </select>
                         </div>
                         <div className="card-actions justify-end mt-3">
